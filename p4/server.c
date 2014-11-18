@@ -11,27 +11,41 @@
 // Most of the work is done within routines written in request.c
 //
 
-// CS537: Parse the new arguments too
-void getargs(int *port, int argc, char *argv[])
+void* workerLoop(void* param)
 {
-    if (argc != 2) {
-	fprintf(stderr, "Usage: %s <port>\n", argv[0]);
+	return NULL;
+}
+
+// CS537: Parse the new arguments too
+void getargs(int *port, int argc, char *argv[], int *threads, int *buffers)
+{
+    if (argc != 4) {
+	fprintf(stderr, "Usage: %s <port> <threads> <buffers>\n", argv[0]);
 	exit(1);
     }
     *port = atoi(argv[1]);
+		*threads = atoi(argv[2]);
+		*buffers = atoi(argv[3]);
 }
 
 
 int main(int argc, char *argv[])
 {
-    int listenfd, connfd, port, clientlen;
+    int listenfd, connfd, port, clientlen, threads, buffers, i;
     struct sockaddr_in clientaddr;
 
-    getargs(&port, argc, argv);
+    getargs(&port, argc, argv, &threads, &buffers);
+
+		pthread_t *workers[threads];
 
     // 
     // CS537: Create some threads...
     //
+
+		for (i = 0; i < threads; i++)
+		{
+			pthread_create(workers[i], NULL, workerLoop, NULL);
+		}
 
     listenfd = Open_listenfd(port);
     while (1) {
